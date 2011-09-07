@@ -1,0 +1,25 @@
+Welcome to the Mobile Computing repository!
+
+My name is Nick Pascucci; I own the place. I'm a student at the Colorado College
+and I'm taking a class in Mobile/Pervasive computing. This repository stores my
+class assignments and code, and can act as a resource for other people
+interested in the topic as well as make sharing and collaboration easier for my 
+classmates.
+
+Feel free to use any of this code, but please comply with the MIT license for
+it. Also, please don't plagiarize my work for a school assignment; it's just not
+cool.
+
+Tips:
+Each assignment has its own directory with a Makefile. If unit tests are
+included, run "make test" to run them. "make dist" will tar up all of the
+relevant files into a tar.gz archive. Read the Makefiles for more targets to
+run.
+
+A lot of the assignments will be in Python; non-executable files don't have a
+main function and can't be run independently. You can, however, use them in the
+interpreter if you add the directory created by cloning this repository (or any
+parent thereof) to your PYTHONPATH environment variable.
+
+Happy Hacking!
+-Nick
