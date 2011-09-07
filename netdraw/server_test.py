@@ -29,6 +29,14 @@ class ServerUnitTest(unittest.TestCase):
             self.server._parse_packet,
             "foo")
 
+    def testDrawPoint(self):
+        """Server should send commands to the display on receiving packet."""
+        packet = "point 0 0 50 50 0 0 255"
+        expected_args = ((0,0), (0, 0, 255))
+        self.server._parse_packet(packet)
+        generated_args = self.mock_display.wasCalled(self.mock_display.drawPoint)
+        assert generated_args == expected_args
+
     def testDrawLine(self):
         """Server should send commands to the display on receiving packet."""
         packet = "line 0 0 50 50 0 0 255"
@@ -54,22 +62,30 @@ class ServerUnitTest(unittest.TestCase):
             self.mock_display.drawEllipse)
         assert generated_args == expected_args
 
-    def testDrawPoint(self):
+    def testDrawRectFilled(self):
         """Server should send commands to the display on receiving packet."""
-        packet = "point 0 0 50 50 0 0 255"
-        expected_args = ((0,0), (0, 0, 255))
+        packet = "rectf 0 0 50 50 0 0 255"
+        expected_args = ((0,0), (50, 50), (0, 0, 255))
         self.server._parse_packet(packet)
-        generated_args = self.mock_display.wasCalled(self.mock_display.drawPoint)
+        generated_args = self.mock_display.wasCalled(self.mock_display.fillRect)
+        assert generated_args == expected_args
+
+    def testDrawEllipseFilled(self):
+        """Server should send commands to the display on receiving packet."""
+        packet = "ellipsef 0 0 50 50 0 0 255"
+        expected_args = ((0,0), (50, 50), (0, 0, 255))
+        self.server._parse_packet(packet)
+        generated_args = self.mock_display.wasCalled(
+            self.mock_display.fillEllipse)
         assert generated_args == expected_args
 
 class ServerIntegrationTest(unittest.TestCase):
     """Class for testing whole-server functionality."""
     def setUp(self):
-        self.server = subprocess.Popen(["./server.py"])
+        self.server = subprocess.Popen(["./server.py", "8090"])
         time.sleep(1) # Wait for server to start
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect(("localhost", 6060))
-
+        self.socket.connect((server._get_ip_addr(), 8090))
 
     def tearDown(self):
         self.server.kill()

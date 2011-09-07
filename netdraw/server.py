@@ -1,20 +1,24 @@
 #!/usr/bin/python
-# Server for network drawing program.
 
 __author__ = "Nick Pascucci (npascut1@gmail.com)"
 
 import logging
 import signal
 import socket
+import sys
 import threading
 from MobileComputing.netdraw import display
 
 logging.basicConfig(level=logging.DEBUG)
 
-PORT = 6060
+DEFAULT_PORT = 6060
 
-# Server is started, so it creates a socket to listen on and spawns a listener
-# to detach from the main process.
+"""Server for the network drawing program.
+
+To use, run this file from the command line. This program takes up to one
+optional argument which is interpreted as the port to bind to. The server will
+bind to the current internet facing-address, NOT localhost.
+"""
 
 class ParseError(Exception):
     """Generic parsing error."""
@@ -26,26 +30,38 @@ class DrawServer:
     def __init__(self, display):
         self.display = display
 
-    def start(self):
+    def start(self, port):
         """Start the server and accept incoming connections."""
         logging.debug("Creating socket.")
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        addr = self._get_ip_addr() # socket.gethostbyname(socket.gethostname())
-        self.socket.bind((addr, PORT))
-        logging.debug("Bound to %s:%d" % (addr, PORT))
+        addr = _get_ip_addr() # socket.gethostbyname(socket.gethostname())
+        self.socket.bind((addr, port))
+        logging.debug("Bound to %s:%d" % (addr, port))
         sockname = self.socket.getsockname()
         logging.info("Accepting new connections on %s port %d." % sockname)
+        print "Accepting new connections on %s port %d." % sockname
         self.socket.listen(0)
+        (conn, address) = self.socket.accept()
+        logging.debug("Accepted new connection from %s:%d." % address)
+        conn.send("size %d %d" % self.display.size)
         while True:
-            conn, address = self.socket.accept()
-            logging.debug("Accepted new connection from %s." % address)
+            packet = conn.recv(4096)
+            if not packet:
+                break
+            try:
+                self._parse_packet(packet)
+            except ParseError:
+                pass
 
     def stop(self):
+        logging.info("Stopping server.")
         self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
+        logging.info("Done! Shutting down.")
 
     def _parse_packet(self, packet):
         """Parse a packet to determine its intent."""
+        logging.debug("Received packet:\n%s" % packet)
         contents = packet.split(" ")
         if len(contents) < 8:
             logging.error("Received incomplete packet.")
@@ -67,16 +83,22 @@ class DrawServer:
         elif type == "ellipsef":
             self.display.fillEllipse(point1, point2, color)
 
-    def _get_ip_addr(self):
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("gmail.com",80))
-        return s.getsockname()[0]
+def _get_ip_addr():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("gmail.com", 80))
+    return s.getsockname()[0]
 
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        port = DEFAULT_PORT
+    else:
+        port = int(sys.argv[1])
     screen = display.Display((640, 480))
     server = DrawServer(screen)
+
     def handle_signal(signum, frame):
+        logging.info("Caught SIGTERM.")
         server.stop()
-#    signal.signal(signal.SIGKILL, handle_signal)
     signal.signal(signal.SIGTERM, handle_signal)
-    server.start()
+
+    server.start(port)

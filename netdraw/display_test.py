@@ -5,8 +5,8 @@ __author__ = "Nick Pascucci (npascut1@gmail.com)"
 """Unit tests for the display."""
 
 import unittest
-import MobileComputing.netdraw.display as display
 import pygame.display
+import MobileComputing.netdraw.display as display
 
 COLOR = (50, 50, 50)
 SIZE = (640, 480)
