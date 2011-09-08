@@ -85,7 +85,7 @@ class ServerIntegrationTest(unittest.TestCase):
         self.server = subprocess.Popen(["./server.py", "8090"])
         time.sleep(1) # Wait for server to start
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect((server._get_ip_addr(), 8090))
+        self.socket.connect((server.get_ip_addr(), 8090))
 
     def tearDown(self):
         self.server.kill()

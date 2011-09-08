@@ -6,7 +6,6 @@ import logging
 import signal
 import socket
 import sys
-import threading
 from MobileComputing.netdraw import display
 
 logging.basicConfig(level=logging.DEBUG)
@@ -43,7 +42,7 @@ class DrawServer(object):
         """
         logging.debug("Creating socket.")
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        addr = _get_ip_addr()
+        addr = get_ip_addr()
         self.socket.bind((addr, port))
         logging.debug("Bound to %s:%d" % (addr, port))
         
@@ -62,7 +61,8 @@ class DrawServer(object):
             if not packet:
                 break
             try:
-                self._parse_packet(packet)
+                for cmd in packet.split("\n"):
+                    self._parse_packet(cmd)
             except ParseError:
                 pass # Occasional empty packet shouldn't kill us.
 
@@ -104,7 +104,7 @@ class DrawServer(object):
         elif type == "ellipsef":
             self.display.fillEllipse(point1, point2, color)
 
-def _get_ip_addr():
+def get_ip_addr():
     """Resolve the network-facing IP address."""
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("gmail.com", 80))
