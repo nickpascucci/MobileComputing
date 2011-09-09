@@ -8,7 +8,7 @@ import socket
 import sys
 from MobileComputing.netdraw import display
 
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 
 DEFAULT_PORT = 6060
 
@@ -36,7 +36,7 @@ class DrawServer(object):
 
     def start(self, port):
         """Start the server and accept incoming connections.
-        
+
         Args:
           port: The port to listen on.
         """
@@ -45,17 +45,17 @@ class DrawServer(object):
         addr = get_ip_addr()
         self.socket.bind((addr, port))
         logging.debug("Bound to %s:%d" % (addr, port))
-        
+
         sockname = self.socket.getsockname()
         logging.info("Accepting new connections on %s port %d." % sockname)
         print "Accepting new connections on %s port %d." % sockname
         self.socket.listen(0)
-        
+
         (conn, address) = self.socket.accept() # conn is a socket.socket object
         self.conn = conn
         logging.debug("Accepted new connection from %s:%d." % address)
         self.conn.send("size %d %d" % self.display.size) # Part of the protocol
-        
+
         while True:
             packet = self.conn.recv(4096)
             if not packet:

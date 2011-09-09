@@ -19,7 +19,7 @@ class ClientTest(unittest.TestCase):
         """Send to server should send the lines as-is."""
         test_line = "line 0 0 40 40 200 200 200"
         self.client.sendToServer([test_line])
-        generated_args = self.mock_sock.wasCalled(self.mock_sock.send)
+        generated_args = self.mock_sock.wasCalled(self.mock_sock.sendall)
         assert generated_args[0] == test_line
 
     def testRejectsInvalidInput(self):
@@ -54,11 +54,11 @@ class ClientTest(unittest.TestCase):
         addr = "127.0.0.1:80"
         parsed = client.parse_addr(addr)
         assert parsed == ("127.0.0.1", 80)
-            
+
 class WasNotCalledError(Exception):
     """Generic exception for testing."""
     pass
-        
+
 class MockSocket(object):
     def __init__(self):
         self.called_functions = {}
@@ -72,10 +72,13 @@ class MockSocket(object):
     def send(self, string, flags=0):
         self.called_functions[self.send] = (string, flags)
 
+    def sendall(self, string, flags=0):
+        self.called_functions[self.sendall] = (string, flags)
+
     def recv(self, bufsize, flags=0):
         self.called_functions[self.send] = (bufsize, flags)
 
 
-    
+
 if __name__ == "__main__":
     unittest.main()

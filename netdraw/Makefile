@@ -19,7 +19,8 @@ lint:
 	pylint --errors-only *.py
 
 clean:
-	rm *.pyc
+	- rm *.pyc
+	- rm netdraw.tar
 
 dist: clean
 	tar -cf netdraw.tar client.py display.py server.py
