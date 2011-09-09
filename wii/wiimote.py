@@ -6,10 +6,6 @@ import bluetooth
 ACCEL_MODE = 0x52120031
 BUTTON_MODE = 0x52120030
 
-# Data Constants
-BUTTON_PRESSED = 0
-BUTTON_RELEASED = 1
-
 # Convert a number into a list of bytes
 def to_byte_list(val):
     result = []
@@ -56,7 +52,8 @@ def _extract_buttons(byte1, byte2):
             byte2_buttons[button] = True
         else:
             byte2_buttons[button] = False
-    return byte1_buttons.update(byte2_buttons) # Return the whole map
+    byte1_buttons.update(byte2_buttons) # Return the whole map
+    return byte1_buttons
 
 def _extract_accel(array):
     x_val = int(array[2]) << 2
@@ -80,7 +77,7 @@ class WiiMote(object):
 
     def __init__(self):
         # Hardware address for Bluetooth receiver
-        bd_addr = "00:02:72:21:30:F7"
+        bd_addr = "8C:56:C5:3E:DF:73"
 
         self.isocket = bluetooth.BluetoothSocket(bluetooth.L2CAP)
         self.osocket = bluetooth.BluetoothSocket(bluetooth.L2CAP)
@@ -88,27 +85,22 @@ class WiiMote(object):
         # 19 and 17 are the magic Wiimote ports
         self.isocket.connect((bd_addr,19))
         self.osocket.connect((bd_addr,17))
-        self._set_mode(ACCEL_MODE)
-
-    def _set_mode(self, mode):
-        """Set the wiimote mode."""
-        self.mode = mode
-        self.send_data(to_byte_list(mode))
+        self.button_listeners = []
+        self.accel_listeners = []
+        self.send_data(to_byte_list(ACCEL_MODE))
 
     def _interpret_packet(self, packet):
         """Read a packet and call the listener functions.
 
         Args:
           packet: The bytes of the packet received.
-
-        Returns:
-          A dictionary mapping buttons and accelerometer names to values.
         """
         packet = packet[2:] # Discard the first two bytes.
         bytes = bytearray(packet) # Separate out the bytes
-        buttons = _extract_buttons(bytearray[0], bytearray[1])
-        accel = _extract_accel(bytearray)
-        return buttons.update(accel) # Zip all the data together.
+        buttons = _extract_buttons(bytes[0], bytes[1])
+        accel = _extract_accel(bytes)
+        self._send_button_event(buttons)
+        self._send_accelerometer_event(accel)
 
     def _send_button_event(self, data):
         """Send an event to button listeners.
@@ -116,8 +108,8 @@ class WiiMote(object):
         Args:
           data: An 11-tuple representing the button states.
         """
-        # TODO Implement this
-        pass
+        for listener in self.button_listeners:
+            listener(data)
 
     def _send_accelerometer_event(self, data):
         """Send an event to the accelerometer listeners.
@@ -125,8 +117,14 @@ class WiiMote(object):
         Args:
           data: A 3-tuple representing accelerometer values.
         """
-        # TODO Implement this
-        pass
+        for listener in self.accel_listeners:
+            listener(data)
+
+    def register_accel_listener(self, listener):
+        self.accel_listeners.append(listener)
+
+    def register_button_listener(self, listener):
+        self.button_listeners.append(listener)
 
     # Send a list of bytes out
     def send_data(self, data):
@@ -136,7 +134,15 @@ class WiiMote(object):
             self.osocket.send(str_data)
 
     def run(self):
-        """Enter a loop to poll the wiimote and call callback functions."""
-        pass
+        """Enter a loop to poll the wiimote and call callback functions.
 
+        This method will block execution until the thread containing it is
+        killed.
+        """
+        while True:
+            self.check_for_data()
 
+    def check_for_data(self):
+        msg = self.isocket.recv(128)
+        print bytearray(msg)
+        self._interpret_packet(msg)
