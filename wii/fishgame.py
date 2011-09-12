@@ -33,9 +33,18 @@ class Fish(object):
         
         #needs to have randomized sign
         self.direction = (random.random(),random.random())
+        
+        if random.choice([True, False]):
+            self.direction[0] = self.direction[0] * -1
+        if random.choice([True, False]):
+            self.direction[0] = self.direction[0] * -1
+        
         self.location = (self.location[0]+num_millis*self.velocity*self.direction[0], 
             self.location[1] + num_millis*self.velocity*self.direction[1])
         print "Drawing sprite at", self.location
+        
+        # TODO make the sprite rotate
+        
         draw_sprite(self.sprite, canvas, self.location)
 
 class Environment(object):
