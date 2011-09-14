@@ -13,7 +13,6 @@ y_size = 800.0
 def move_mouse(data): # Callback for ir tracking
     x = x_size - (data["ir_x"] * (x_size / 1024))
     y = data["ir_y"] * (y_size / 768)
-    print "Moving to", x, y
     m.move_absolute(int(x), int(y))
 
 left_down = False
@@ -38,7 +37,6 @@ def click_mouse(data): # Callback for mouse clicks
         args = ["xdotool", "mouseup", "3"]
         subprocess.Popen(args)
         right_down = False
-
 
 wm.register_ir_listener(move_mouse)
 wm.register_button_listener(click_mouse)

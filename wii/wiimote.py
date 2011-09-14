@@ -73,14 +73,10 @@ def _extract_accel(array):
 def _extract_ir(array):
     """Extract IR data from a byte array."""
     x1 = int(array[5]) # Two LSB for the IR data
-    print "x1:", x1
     y1 = int(array[6])
-    print "y1:", y1
     # Ripping out the most significant bits from packed byte
     x1 += int((array[7] & (0x03 << 4)) << 4)
-    print "x2:", x1
     y1 += int((array[7] & (0x03 << 6)) << 2)
-    print "y2:", y1
     return {"ir_x": x1, "ir_y": y1}
 
 class WiiMote(object):
@@ -91,7 +87,8 @@ class WiiMote(object):
 
     def __init__(self):
         # Hardware address for Bluetooth receiver
-        bd_addr = "8C:56:C5:3E:DF:73"
+        #bd_addr = "8C:56:C5:3E:DF:73"
+        bd_addr = "8C:56:C5:3E:E1:9B"
 
         self.isocket = bluetooth.BluetoothSocket(bluetooth.L2CAP)
         self.osocket = bluetooth.BluetoothSocket(bluetooth.L2CAP)
@@ -216,6 +213,5 @@ class WiiMote(object):
 
     def check_for_data(self):
         msg = self.isocket.recv(128)
-        print bytearray(msg)
         if len(msg) == 23:
             self._interpret_packet(msg)
