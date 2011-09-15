@@ -1,3 +1,7 @@
+/**
+ * TrackZ: An application to use an Android device's touchscreen as a trackpad.
+ */
+
 package com.android.trackz;
 
 import java.io.IOException;
@@ -76,18 +80,15 @@ public class TrackzActivity extends Activity implements OnTouchListener {
 		ImageView view = (ImageView) findViewById(R.id.imageView1);
 		view.setOnTouchListener(this);
 		
-		Toast.makeText(this, "GOT A FUCKING CONNECTION!", Toast.LENGTH_SHORT)
+		Toast.makeText(this, "Got a connection!", Toast.LENGTH_SHORT)
 				.show();
 		socket = a_socket;
-		try {
-			socket.getOutputStream().write("Hell yes!".getBytes());
-		} catch (IOException e) {
-			// FUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU
-			int i = 1;
-		}
-
 	}
 
+	/**
+	 * Handle touch events. This calculates the delta and sends the motion
+	 * to the trackz service on the computer.
+	 */
 	public boolean onTouch(View v, MotionEvent event) {
 		float x = event.getX();
 		float y = event.getY();
@@ -104,6 +105,14 @@ public class TrackzActivity extends Activity implements OnTouchListener {
 			prev_x = x;
 			prev_y = y;
 		}
+//		else if (event.getAction() == MotionEvent.ACTION_UP){
+//			float delta_x = x - prev_x;
+//			float delta_y = y - prev_y;
+//			
+//			if(Math.abs(delta_x) < 5 && Math.abs(delta_y) < 5){
+//				sendMotion(2, delta_x, delta_y);
+//			}
+//		}
 		return true;
 	}
 
@@ -117,6 +126,7 @@ public class TrackzActivity extends Activity implements OnTouchListener {
 			os.write(bb.array());
 			os.flush();
 		} catch (IOException e) {
+			// Do nothing.
 		}
 	}
 
@@ -130,8 +140,7 @@ public class TrackzActivity extends Activity implements OnTouchListener {
 
 		public void createServerSocket() {
 			try {
-				// MY_UUID is the app's UUID string, also used by the client
-				// code
+				// MY_UUID is the app's UUID string, also used by the client code
 				srvSocket = adapter.listenUsingRfcommWithServiceRecord(NAME,
 						MY_UUID);
 			} catch (IOException e) {

@@ -22,7 +22,8 @@ class Tracker(object):
         self.print_greeting()
 
     def on_tag(self, e):
-        serial_number = e.device.getSerialNum()
+        serial_number = e.tag
+        print "Serial:", serial_number
         timestamp = self.get_timestamp()
         self.database_put(str(serial_number), timestamp)
 
@@ -51,9 +52,9 @@ class Tracker(object):
     @staticmethod
     def get_student_info():
         print "Hello! I haven't met you yet."
-        name = raw_input("What's your name?")
+        name = raw_input("What's your name? ")
         print "Pleased to meet you, %s!" % name
-        grade = raw_input("What grade are you in?")
+        grade = raw_input("What grade are you in? ")
         print "That's great. Have a nice day!"
         return (name, grade)
 
@@ -71,7 +72,9 @@ def main():
     db = couchdb.Server()["students"]
     rfid = RFID.RFID()
     Tracker(rfid, db)
-    raw_input("Press Enter to exit.")
+    #raw_input("Press Enter to exit.")
+    while True:
+        pass
         
 if __name__ == "__main__":
     main()

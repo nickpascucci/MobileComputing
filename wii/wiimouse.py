@@ -17,26 +17,6 @@ def move_mouse(data): # Callback for ir tracking
 
 left_down = False
 right_down = False
-def click_mouse(data): # Callback for mouse clicks
-    global left_down
-    global right_down
-    if data["a"]:
-        args = ["xdotool", "mousedown", "1"]
-        subprocess.Popen(args)
-        left_down = True
-    elif left_down:
-        args = ["xdotool", "mouseup", "1"]
-        subprocess.Popen(args)
-        left_down = False
-
-    if data["minus"]:
-        args = ["xdotool", "mousedown", "3"]
-        subprocess.Popen(args)
-        right_down = True
-    elif right_down:
-        args = ["xdotool", "mouseup", "3"]
-        subprocess.Popen(args)
-        right_down = False
 
 wm.register_ir_listener(move_mouse)
 wm.register_button_listener(click_mouse)

@@ -24,10 +24,11 @@ class MockRfid(object):
 class MockEvent(object):
     def __init__(self, device):
         self.device = device
+        self.tag = 12345
         
 class MockDevice(object):
     def __init__(self):
         pass
 
     def getSerialNum(self):
-        return 1234
+        return 67890

@@ -24,9 +24,11 @@ def process(data):
     move_type = bitstring.BitArray(data[:4]).int
     delta_x = bitstring.BitArray(data[4:8]).int
     delta_y = bitstring.BitArray(data[8:]).int
-    print "Move by ", delta_x, delta_y
-    maus.move_offset(delta_x, delta_y)
-
+    if move_type == 1:
+        print "Move by ", delta_x, delta_y
+        maus.move_offset(delta_x, delta_y)
+    elif move_type == 2:
+        maus.click_mouse(mouse.LEFT_CLICK)
 
 print "Discovering devices!"
 

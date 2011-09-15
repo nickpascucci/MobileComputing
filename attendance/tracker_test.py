@@ -15,9 +15,9 @@ class TrackerTest(unittest.TestCase):
 
     # Test when RFID of extant user is read, writes timestamp
     def testWritesTimestampOnRead(self):
-        self.db["1234"] = {"timestamps": [1234], "name":"Sally"}
+        self.db["12345"] = {"timestamps": [1234], "name":"Sally"}
         self.rfid.send_tag_event()
-        items = len(self.db["1234"]["timestamps"])
+        items = len(self.db["12345"]["timestamps"])
         assert items is 2
 
     def testCreatesRecordForNewTag(self):
@@ -25,7 +25,7 @@ class TrackerTest(unittest.TestCase):
             return ("Sally", 12)
         self.tracker.get_student_info = new_get_student_info
         self.rfid.send_tag_event()
-        assert self.tracker.db["1234"] is not None
+        assert self.tracker.db["12345"] is not None
 
 
 if __name__ == "__main__":
