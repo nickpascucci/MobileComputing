@@ -35,7 +35,7 @@ class Client(object):
         for string in commands:
             print "Sending %s." % string
             self._socket.sendall(string)
-    
+
 def validate(string):
     """Validate the string to see if it matches the protocol."""
     # I can't believe this worked the first time, but it passes the tests!
