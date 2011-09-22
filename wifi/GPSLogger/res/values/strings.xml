@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hide that Treasure!</string>
+    <string name="app_name">Wifi Mapper</string>
+    <string name="Start">Start</string>
+    <string name="FoundTreasure">Found Treasure</string>
+    <string name="Finish">Finish</string>
+</resources>

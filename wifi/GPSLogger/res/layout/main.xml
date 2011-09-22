@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	android:weightSum="1" android:orientation="vertical">
+	<LinearLayout android:layout_width="match_parent"
+		android:layout_height="wrap_content" android:id="@+id/linearLayout1"
+		android:orientation="vertical" android:layout_weight="0.61"
+		android:weightSum="1">
+		<LinearLayout android:layout_width="match_parent"
+			android:id="@+id/linearLayout2" android:weightSum="1"
+			android:layout_height="wrap_content">
+			<Button android:layout_height="wrap_content"
+				android:layout_weight="0.21" android:text="@string/Start"
+				android:id="@+id/button1" android:onClick="onGo"
+				android:layout_width="wrap_content"></Button>
+			<Button android:layout_height="wrap_content"
+				android:layout_weight="0.39" android:text="@string/Finish"
+				android:onClick="onEnd" android:id="@+id/button3"
+				android:layout_width="wrap_content"></Button>
+		</LinearLayout>
+		<LinearLayout android:layout_width="match_parent"
+			android:id="@+id/linearLayout3" android:layout_height="wrap_content"
+			android:layout_weight="0.40" android:weightSum="1">
+			<RelativeLayout android:id="@+id/relativeLayout1"
+				android:layout_width="wrap_content" android:layout_height="match_parent">
+				<ProgressBar android:layout_width="wrap_content"
+					android:layout_height="wrap_content" android:layout_centerVertical="true"
+					android:layout_alignParentLeft="true" android:id="@+id/progressBar1"></ProgressBar>
+			</RelativeLayout>
+			<TextView android:layout_height="wrap_content" android:text="TextView"
+				android:layout_width="wrap_content" android:layout_centerVertical="true"
+				android:textAppearance="?android:attr/textAppearanceLarge"
+				android:id="@+id/textView1"></TextView>
+		</LinearLayout>
+	</LinearLayout>
+</LinearLayout>
