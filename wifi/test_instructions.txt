@@ -1,0 +1,3 @@
+Test data location: 38.84900465, -104.8232429
+
+(tigernet2, 00:0b:86:56:2d:41, -78), (tigernet2, 00:0b:86:53:df:60, -78), (tigernet2, 00:0b:86:51:ae:00, -78), (tigernet2, 00:0b:86:54:0d:a0, -85), (tigernet2, 00:0b:86:56:dc:80, -86), (tigernet2, 00:0b:86:53:e0:80, -90), (tigernet2, 00:0b:86:51:4c:e0, -92), (tigernet2, 00:0b:86:54:0c:e0, -93), (tigernet2, 00:0b:86:51:49:c0, -94), (tigernet2, 00:0b:86:51:a6:21, -96), (tigernet2, 00:0b:86:51:ae:61, -97), (tigernet2, 00:0b:86:63:7c:01, -97), (tigernet2, 00:0b:86:51:ac:c0, -97)
