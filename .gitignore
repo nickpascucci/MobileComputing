@@ -1,0 +1,6 @@
+# Ignore all rope data.
+.ropeproject
+
+# Ignore all compiled python files.
+*.pyc
+
