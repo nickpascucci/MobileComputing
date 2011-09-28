@@ -1,0 +1,175 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage[version=3]{mhchem}
+\usepackage{fullpage}
+\headsep = 25pt
+\pagestyle{myheadings}
+\markright{Nick Pascucci \hfill Motes \hfill}
+
+\usepackage{color,hyperref}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.3}
+\hypersetup{colorlinks,breaklinks,
+            linkcolor=darkblue,urlcolor=darkblue,
+            anchorcolor=darkblue,citecolor=darkblue}
+
+% Uses hyperref to link DOI
+\newcommand\doilink[1]{\href{http://dx.doi.org/#1}{#1}}
+\newcommand\doi[1]{doi:\doilink{#1}}
+
+% For \url{SOME_URL}, links SOME_URL to the url SOME_URL
+\providecommand*\url[1]{\href{#1}{#1}}
+% Same as above, but pretty-prints SOME_URL in teletype fixed-width font
+\renewcommand*\url[1]{\href{#1}{\texttt{#1}}}
+
+% Title Page
+\title{Arduino-based Motes with XBee Radios}
+\author{Nick Pascucci}
+\date{09/27/2011}
+\begin{document}
+\maketitle
+
+\section{Overview}
+Ubiquitous computing relies heavily on sensor data. Having a variety of useful
+devices located throughout an environment provides the system with the ability
+to make better decisions. In general, these devices must be small and low power,
+they must be wireless, and they must be cheap. Current technology allows us to
+come closer to meeting all of these goals than ever before. Unfortunately, the
+tools needed to develop applications against these systems are not widely
+available or accessible.
+
+On the other hand, the Arduino project has created an incredibly accessible and
+easy to use platform for developing embedded computing projects. The Arduino
+system combines a set of common development boards with a simple development
+environment and a set of C++ tools which make embedded systems accessible. There
+are a huge number of libraries and projects which make use of the Arduino or
+provide additional functionality to the platform. I decided that this
+characteristic made the Arduino a good starting point for an accessible sensor
+node platform.
+
+This paper will describe the overall architecture of the system. I will discuss
+both the producer and consumer aspects of the sensor system, illustrating the
+challenges I encountered while implementing it and the solutions I used to
+resolve them.
+
+\section{Producers}
+Sensors are where it all begins. The data collection in my system is performed
+by a pair of Arduino microcontrollers, which can easily be interfaced to a
+variety of different sensors. For the purposes of the system's development, I
+ran a simple program (see xbee.pde) which outputs an array of 20 bytes every
+second to the attached radio. This firmware could easily be augmented and
+extended to read data from a photoresistor, IR motion detector, laser tripwire,
+I2C temperature sensor, or any of a variety of other devices. Data would be
+buffered onboard the sensor and transmitted when 20 bytes had been collected.
+
+Transmission occurs using a Digi XBee Series 2 2.4GHz radio. These radios are
+programmable ZigBee compliant devices which operate in the 2.4GHz unlicensed
+band at a transmit power of 50mW. The radios I used had chip antennas, which
+improves their overall size at the expense of operating range. The devices are
+easily used as part of a point-to-point or point-to-multipoint mesh
+network. This is facilitated by their extensive AT command set and support for
+both remote and local API modes. 
+
+Fortunately, other developers have recognized the potential uses for these
+radios as well. I made use of a preexisting XBee library (available at
+http://code.google.com/p/xbee-arduino/) to handle interactions with the
+device. The library abstracted the need to construct the packets and AT commands
+which instruct the radio to transmit, and allowed me to proceed much more
+quickly. The library also proved invaluable in deciphering the XBee API2
+protocol, which was necessary on the consumer side. 
+
+Data collected by the sensors is broadcast to the ``harvester'' node, which
+consists of a single XBee radio attached to a desktop computer via a USB to
+serial converter. The converter allows the host machine to see the XBee as a
+serial port to which all of the input and output is directed.
+
+\section{Consumer}
+Data produced by the sensor nodes is tunneled to a Python program running on the
+host computer via the serial port. This program monitors the serial port and a
+server socket, opening new connections as clients connect and forwarding the
+received data to them as it becomes available. It also performs a translation
+between the XBee protocol into an application-level protocol mirroring that used
+by CrossBow electronics' mote application. (This is the same protocol used in our
+in-class assignment.)
+
+In order to remain responsive to the serial port, server socket, and each
+client, the program must be multi-threaded. This posed a difficult architectural
+problem, as the ideal structure for the system was not immediately obvious. My
+first inclination was to design the system such that a new thread was created
+for each client from the main thread, which would contain the server
+socket. Another thread would monitor the serial port. This required a large
+amount of shared state, and necessitated communication mechanisms not well
+supported by the existing libraries to relay new serial data to the client
+threads.
+
+I eventually decided that this design was untenable and sought to simplify
+it. The design I settled on used only four threads: The main thread, one server,
+one client, and one serial monitoring thread. The server thread waits for
+incoming connections and enqueues them into a thread-safe FIFO queue. This queue
+is periodically emptied by the client thread, which adds each client socket into
+an internal list. The serial thread monitors the serial port, and adds data to a
+second queue as it becomes avaiable (generally, one byte at a time). The client
+thread reads this new data and passes it to a dedicated packet builder which
+assembles the data one byte at a time into a packet. When a full packet has been
+received, the client thread parses it into the proper form for the chosen
+protocol, and transmits it to each client. The main thread simply waits for the
+user to press the Enter key and terminates the program when this occurs.
+
+\section{Extension}
+The system is designed to be very loosely coupled. The sensors themselves are
+able to communicate with any ZigBee compliant device, and use standard protocols
+to communicate with each other. This allows new sensors from different
+manufacturers to be added to the network as needed. As serial protocols are well
+standardized, the link between the network and the host computer is also of
+little concern. Any serial streaming device can be used to send data to the
+machine; this could be anything from one microcontroller to millions of nodes in
+a distributed network to a stand-in software device emulating a serial port. The
+parsing and packetization of the data is performed in two files which are
+separate from the main client-handling logic, enabling them to be easily
+replaced by new handlers (Strategy pattern). Clients wishing to receive the data
+can simply connect over standard TCP to the monitoring program and receive data
+in a format dictated by the aforementioned files.
+
+This loose coupling allows new applications to be developed easily, while
+reusing as much of the existing structure as possible. Certain aspects of the
+program such as client handling are highly unlikely to change; while others,
+such as parsing and packetization, are very application dependent. These two
+categories are kept well separated and are meant to encourage developers to
+adapt the system to their needs.
+
+\section{The Future}
+Now that we have a platform that can be easily modified and supports open
+end to end development, what applications are there? We have already discussed
+this in generalities; what is needed now is a practical discussion. 
+
+The benefit of these systems can be realized in a variety of ways. One the comes
+to mind first is simply the distributed monitoring of environmental
+conditions. Attaching a set of environmental sensors, such as humidity,
+pressure, lighting, and temperature sensors, one can use the system to monitor
+anything from the interior of a building to a large outdoor area. This data
+could be used to adjust the building HVAC systems, or to monitor the healthiness
+of an ecosystem. This sort of monitoring has numerous scientific and commercial
+applications.
+
+A second potential use could be the collection of usage information in a
+commercial structure. Based on the utilization patterns of various areas and
+features, a museum, shop, stadium, or any number of other locations could be
+evaluated for efficient use of resources such as exhibits or vendors. This could
+be accomplished rather simply on a set of networked Arduinos. 
+
+Finally, I propose that the system could also be applied towards intelligent
+manufacturing. The system could be used to monitor usage of spare parts or
+consumables in a repair shop, factory, or storefront and order new components to
+be manufactured as needed.
+
+There are certain to be more applications which will be made apparent in the
+future. This system, though simple, is extensible enough that it should be able
+to meet their needs for the foreseeable future.
+
+
+\vfill
+\textit{This work is licensed under the Creative Commons Attribution-ShareAlike
+  license. You are free to share, remix, and make commercial use of this work
+  under the condition that you provide attribution to the author and share all
+  derivative works under this license. Read the full text at the
+  \href{http://creativecommons.org/licenses/by-sa/3.0/}{Creative Commons Website}.}
+\end{document}          
