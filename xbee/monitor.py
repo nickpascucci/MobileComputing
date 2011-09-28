@@ -10,7 +10,7 @@ from MobileComputing.xbee.serialthread import SerialThread
 from MobileComputing.xbee.clientthread import ClientThread
 from MobileComputing.netdraw.server import get_ip_addr
 
-PORT = 7677
+PORT = 9002
 
 class ServerThread(threading.Thread):
     """Implements a threaded server.
